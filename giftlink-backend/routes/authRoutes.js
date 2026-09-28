@@ -17,9 +17,6 @@ dotenv.config();
 //Step 1 - Task 4: Create JWT secret
 const JWT_SECRET = process.env.JWT_SECRET;
 
-//Task 1: Use the `body`,`validationResult` from `express-validator` for input validation
-const { body, validationResult } = require('express-validator');
-
 //Step 2
 router.post('/register', async (req, res) => {
     try {
