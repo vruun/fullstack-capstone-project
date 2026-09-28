@@ -46,6 +46,8 @@ app.use('/api/search', searchRoutes);
 //adding auth to server
 app.use('/api/auth', authRoutes);
 
+/*jshint esversion: 8 */
+
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error(err);
