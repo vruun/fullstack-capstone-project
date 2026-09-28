@@ -1,14 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import {urlConfig} from '../../config';
+import { useAppContext } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 function LoginPage() {
     //insert code here to create useState hook variables for email, password
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    
+    const [incorrect, setIncorrect] = useState('');
+    const navigate = useNavigate();
+    const bearerToken = sessionStorage.getItem('bearer-token');
+    const { setIsLoggedIn } = useAppContext();
+
+    useEffect(() => {
+        if (sessionStorage.getItem('auth-token')) {
+            navigate('/app');
+        }
+    }, [navigate]);
+
     // insert code here to create handleLogin function and include console.log
     const handleLogin = async () => {
-        console.log("Inside handleLogin");
+        try {
+            const response = await fetch(`${urlConfig.backendUrl}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': bearerToken ? `Bearer ${bearerToken}` : '',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                })
+            });
+    
+            // Task 1
+            const json = await response.json();
+    
+            if (json.authtoken) {
+                // Task 2
+                sessionStorage.setItem('auth-token', json.authtoken);
+                sessionStorage.setItem('name', json.userName);
+                sessionStorage.setItem('email', json.userEmail);
+    
+                // Task 3
+                setIsLoggedIn(true);
+    
+                // Task 4
+                navigate('/app');
+            } else {
+                // Task 5
+                document.getElementById("email").value = "";
+                document.getElementById("password").value = "";
+    
+                setIncorrect("Wrong password. Try again.");
+    
+                setTimeout(() => {
+                    setIncorrect("");
+                }, 2000);
+            }
+    
+        } catch (e) {
+            console.log("Error fetching details: " + e.message);
+        }
     };
 
     return (
@@ -41,7 +95,9 @@ function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-
+                        
+                        <span style={{color:'red',height:'.5cm',display:'block',fontStyle:'italic',fontSize:'12px'}}>{incorrect}</span>
+                        
                         <button
                             className="btn btn-primary w-100 mb-3"
                             onClick={handleLogin}
